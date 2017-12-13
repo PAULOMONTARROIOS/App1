@@ -1,14 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,EventEmitter,Output, OnDestroy} from '@angular/core';
 import { Frase } from '../shared/frases.model'
 import { FRASES } from './frases-mock'
 import { ProgressoComponent } from '../progresso/progresso.component'
+import { TentativasComponent } from '../tentativas/tentativas.component'
 
 @Component({
   selector: 'app-painel',
   templateUrl: './painel.component.html',
   styleUrls: ['./painel.component.css']
 })
-export class PainelComponent implements OnInit {
+export class PainelComponent implements OnInit,OnDestroy {
 
   public frases : Array<Frase> =  FRASES;
   public instrucao : string = "Traduza a frase: ";
@@ -16,32 +17,42 @@ export class PainelComponent implements OnInit {
   public rodada : number = 0;
   public rodadaFrase : Frase;
   public progresso : number = 0;
+  public tentativas : number = 3;
+
+  @Output() public encerrarJogo: EventEmitter<string> = new EventEmitter();
 
   constructor() {
-    this.rodadaFrase = this.frases[this.rodada];
-    console.log(this.rodadaFrase);
+    this.atualizaRodada();
    }
 
   ngOnInit() {
   }
+  ngOnDestroy(){
+  }
 
   public atualizaResposta(resposta : Event) : void {
     this.resposta =  (<HTMLInputElement>resposta.target).value;
-    console.log(this.resposta);
   }
 
   public validaResposta() : void {
     if(this.rodadaFrase.frasePtBr == this.resposta){
         this.rodada++;
-        this.rodadaFrase = this.frases[this.rodada];
-        this.progresso = this.progresso + (100 / this.frases.length)
-        console.log(this.progresso)
-       alert("Acertou !!");
+        if(this.rodada ==  4){
+          this.encerrarJogo.emit('vitoria');
+        }
+        this.atualizaRodada();
+        this.progresso = this.progresso + (100 / this.frases.length);
     }else{
-      this.rodada = 0;
-      this.progresso = 0;
-      this.rodadaFrase = this.frases[this.rodada];
-      alert("Eita, tenta de novo.");
+      this.tentativas--;
+      if(this.tentativas == -1){
+        this.encerrarJogo.emit('derrota');
+      }
+      this.atualizaRodada();
     }
+  }
+
+  private atualizaRodada() : void{
+    this.rodadaFrase = this.frases[this.rodada];
+    this.resposta = '';
   }
 }

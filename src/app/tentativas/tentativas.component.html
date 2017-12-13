@@ -1,4 +1,7 @@
-<img [src]="coracaoCheio"/>
-<img [src]="coracaoCheio"/>
-<img [src]="coracaoVazio"/>
+<!-- 
+    <img [src]="coracoes[0]"/>
+    <img [src]="coracoes[1]"/>
+    <img [src]="coracoes[2]"/>
+-->
 
+<img *ngFor="let coracao of coracoes" [src]="coracao.exibeCoracao()"/>
